@@ -1,4 +1,27 @@
 const { defineConfig } = require('@vue/cli-service')
+const path = require('path')
 module.exports = defineConfig({
-  transpileDependencies: true
+  transpileDependencies: true,
+  chainWebpack: config=>{
+    const svgRule = config.module.rule('svg')
+    // 清除已有的所有 loader 否则接下来的 loader 会附加在该规则现有的 loader 之后
+    svgRule.uses.clear()
+    svgRule
+      .test(/\.svg$/)
+      .include.add(path.resolve(__dirname, './src/assets/icon'))
+      .end()
+      .use('svg-sprite-loader')
+      .loader('svg-sprite-loader')
+      .options({
+        symbolId: 'icon-[name]',
+      })
+    const fileRule = config.module.rule('file')
+    fileRule.uses.clear()
+    fileRule
+      .test(/\.svg$/)
+      .exclude.add(path.resolve(__dirname, './src/assets/icon'))
+      .end()
+      .use('file-loader')
+      .loader('file-loader')
+  }
 })
